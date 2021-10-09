@@ -13,6 +13,8 @@
 
 #include "main.h"
 #include "glut.h"
+#include "Shader.h"
+#include <iostream>
 
 #define M_PI           3.14159265358979323846f  /* pi */
 
@@ -880,8 +882,10 @@ void drawKinectData() {
 *			a_Normal (location = 1)
 * @return num of indices for drwing cubes or
 *		  -1 if buffer object creations fail.
+* @throw runtime_error if vbo or ebo reation fails
 */
-int initVertexBuffer() {
+int initVertexBuffer() throw (std::runtime_error)
+{
 	float cubeSize = 0.1;
 	float verticesNormals[] = {
 		// v0-v1-v2-v3 front
@@ -916,7 +920,7 @@ int initVertexBuffer() {
 		   cubeSize,  cubeSize, -cubeSize,  0.0,  0.0, -1.0
 	};
 
-	int8_t indeces[] = {
+	uint8_t indeces[] = {
 		 0,  1,  2,   0,  2,  3,    // front
 		 4,  5,  6,   4,  6,  7,    // right
 		 8,  9, 10,   8, 10, 11,    // up
@@ -925,23 +929,13 @@ int initVertexBuffer() {
 		20, 21, 22,  20, 22, 23     // back
 	};
 
-	// vertex array object (vao) contains types, components 
-	// and other infos about vertex attributes
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	if (vao == GL_INVALID_VALUE) {
-		printf("Failed to create the vertex array object.\n");
-		return -1;
-	}
-	glBindVertexArray(vao);
+	//VAO is eliminated because this project doesn't need to change vbo or ebo
 
 	// vertex buffer object (vbo) contains vertex attributes
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
-	if (vbo == GL_INVALID_VALUE) {
-		printf("Failed to create the vertex buffer object.\n");
-		return -1;
-	}
+	if (vbo == GL_INVALID_VALUE)
+		throw std::runtime_error("Failed to create the vertex buffer object.\n");
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesNormals), verticesNormals, GL_STATIC_DRAW);
 
@@ -955,66 +949,12 @@ int initVertexBuffer() {
 	// drawing cubes correctly and without repetition
 	GLuint ibo;
 	glGenBuffers(1, &ibo);
-	if (ibo == GL_INVALID_VALUE) {
-		printf("Failed to create the index buffer object.\n");
-		return -1;
-	}
+	if (ibo == GL_INVALID_VALUE)
+		throw std::runtime_error("Failed to create the element buffer object.\n");
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indeces), indeces, GL_STATIC_DRAW);
 
 	return sizeof(indeces) / sizeof(int8_t);
-}
-
-/*
-* @function get shaders from file, compiling
-*			and linking them to the openGL program.
-*			If everything is ok, then it actives the program.
-* @return true if read, compile and link go well,
-*		  false otherwise.
-*/
-bool initShaders() {
-	// get and set shaders from file
-	std::ifstream ivs("vs.glsl");
-	std::ifstream ifs("fs.glsl");
-	if (!ivs || !ifs) {
-		//throw std::runtime_error("failed to open ifstream");
-		return false;
-	}
-	std::string vs((std::istreambuf_iterator<char>(ivs)), (std::istreambuf_iterator<char>()));
-	const char* vsc = vs.c_str();
-	std::string fs((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-	const char* fsc = fs.c_str();
-
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vsc, NULL);
-	glCompileShader(vertexShader);
-
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fsc, NULL);
-	glCompileShader(fragmentShader);
-
-	// create openGL program and link compiled shaders
-	// shaderProgram is a global var
-	shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	//printf("Ver shader error: %s", glGetError());
-	glAttachShader(shaderProgram, fragmentShader);
-	//printf("Frag shader error: %s", glGetError());
-	glLinkProgram(shaderProgram);
-
-	// check everything goes well
-	GLint params;
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &params);
-	if (params != GL_TRUE) {
-		GLchar errorLog[1024] = { 0 };
-		glGetProgramInfoLog(shaderProgram, 1024, NULL, errorLog);
-		printf("error validating shader program; Details: %s", errorLog);
-		return false;
-	}
-
-	// activate openGL program
-	glUseProgram(shaderProgram);
-	return true;
 }
 
 /*
@@ -1056,14 +996,24 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	if (!initShaders()) {
-		printf("Failed to initialize shaders. \n");
+	try {
+		// create shader program object
+		Shader shaderProgramXXX = Shader("vs.glsl", "fs.glsl");
+		// memorize ID shader program
+		shaderProgram = shaderProgramXXX.ID;
+		// activate shader program
+		shaderProgramXXX.activate();
+	}
+	catch (std::runtime_error e) {
+		std::cout << "Error in shaders initialization: " << e.what() << std::endl;
 		return -1;
 	}
 
-	n = initVertexBuffer();
-	if (n < 0) {
-		printf("Failed to initialize vertex buffer. \n");
+	try {
+		n = initVertexBuffer();
+	}
+	catch (std::runtime_error e) {
+		std::cout << "Error in vertex buffers initialization: " << e.what() << std::endl;
 		return -1;
 	}
 
@@ -1106,6 +1056,8 @@ int main(int argc, char* argv[]) {
 
 	// Main loop
 	execute();
+	//glDeleteBuffers(1, &ID);
+	//shaderProgramXXX.deactivate();
 	return 0;
 }
 

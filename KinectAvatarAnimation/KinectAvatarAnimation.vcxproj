@@ -146,10 +146,12 @@
   <ItemGroup>
     <ClCompile Include="glut.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glut.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fs.glsl" />
