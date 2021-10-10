@@ -24,6 +24,9 @@
     <ClCompile Include="Shader.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="KinectSensor.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glut.h">
@@ -33,6 +36,9 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="KinectSensor.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

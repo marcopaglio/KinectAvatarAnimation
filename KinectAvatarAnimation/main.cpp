@@ -14,23 +14,24 @@
 #include "main.h"
 #include "glut.h"
 #include "Shader.h"
+#include "KinectSensor.h"
 #include <iostream>
 
 #define M_PI           3.14159265358979323846f  /* pi */
 
 /*** GLOBAL VARIABLES ***/
 
+// Kinect Variables
+KinectSensor* kinect;
+
 // Body tracking variables
 BOOLEAN tracked;                            // Whether we see a body
 Joint joints[JointType_Count];              // List of joints in the tracked body
 JointOrientation jointOrientation[JointType_Count];
 
-// Kinect Variables
-IKinectSensor* sensor;             // Kinect sensor
-IBodyFrameReader* reader;   // Kinect data source
-
 // openGL program index
-GLuint shaderProgram;
+Shader* shaderProgram;
+GLuint shaderProgramID;
 
 // number of values to draw
 int n;
@@ -737,82 +738,19 @@ glm::mat4 getPositionMatrix(int index_component, float xPosition, float yPositio
 	return posMatrix;
 }
 
-void getBodyData() {
-	IBodyFrame* bodyframe = NULL;
-	if (SUCCEEDED(reader->AcquireLatestFrame(&bodyframe))) {
-		// Kinect can track up to BODY_COUNT people simultaneously (in the SDK, BODY_COUNT == 6)
-		IBody* body[BODY_COUNT] = { 0 };
-		bodyframe->GetAndRefreshBodyData(BODY_COUNT, body);
-		for (int i = 0; i < BODY_COUNT; i++) {
-			body[i]->get_IsTracked(&tracked);
-			if (tracked) {
-				body[i]->GetJoints(JointType_Count, joints);
-				body[i]->GetJointOrientations(JointType_Count, jointOrientation);
-				break;	// deal with one person in this app at a time
-			}
-		}
-	}
-	if (bodyframe) bodyframe->Release();
-}
-
 /*
 * @function setups data from kinect sensor into
 *			joints variables; then
 *			sets openGL buffer for drawing.
 */
 void drawKinectData() {
-	getBodyData();
+	kinect->getBodyData(&tracked, joints, jointOrientation);
 	float xPosition = 0.0;
 	float yPosition = 0.0;
 	float zPosition = 2.0;
 
 	if (tracked) {
-		// Draw some arms
-		const CameraSpacePoint& lh = joints[JointType_WristLeft].Position;
-		const CameraSpacePoint& le = joints[JointType_ElbowLeft].Position;
-		const CameraSpacePoint& ls = joints[JointType_ShoulderLeft].Position;
-		const CameraSpacePoint& rh = joints[JointType_WristRight].Position;
-		const CameraSpacePoint& re = joints[JointType_ElbowRight].Position;
-		const CameraSpacePoint& rs = joints[JointType_ShoulderRight].Position;
-
-		const CameraSpacePoint& sb = joints[JointType_SpineBase].Position;
 		const CameraSpacePoint& sm = joints[JointType_SpineMid].Position;
-		const CameraSpacePoint& hd = joints[JointType_Head].Position;
-		/*glBegin(GL_LINES);
-		glColor3f(1.f, 0.f, 0.f);
-		// lower left arm
-		glVertex3f(lh.X, lh.Y, lh.Z);
-		glVertex3f(le.X, le.Y, le.Z);
-		glColor3f(1.f, 0.f, 1.f);
-		// upper left arm
-		glVertex3f(le.X, le.Y, le.Z);
-		glVertex3f(ls.X, ls.Y, ls.Z);
-		glColor3f(0.f, 0.f, 1.f);
-		// lower right arm
-		glVertex3f(rh.X, rh.Y, rh.Z);
-		glVertex3f(re.X, re.Y, re.Z);
-		glColor3f(0.f, 1.f, 0.f);
-		// upper right arm
-		glVertex3f(re.X, re.Y, re.Z);
-		glVertex3f(rs.X, rs.Y, rs.Z);
-
-		glColor3f(1.f, 1.f, 0.f);
-		// right shoulder - spine mid
-		glVertex3f(rs.X, rs.Y, rs.Z);
-		glVertex3f(sm.X, sm.Y, sm.Z);
-		// left shoulder - spine mid
-		glVertex3f(ls.X, ls.Y, ls.Z);
-		glVertex3f(sm.X, sm.Y, sm.Z);
-
-		glColor3f(1.f, 1.f, 1.f);
-		// spine base - spine mid
-		glVertex3f(sb.X, sb.Y, sb.Z);
-		glVertex3f(sm.X, sm.Y, sm.Z);
-		// spine mid - head
-		glVertex3f(sm.X, sm.Y, sm.Z);
-		glVertex3f(hd.X, hd.Y, hd.Z);
-
-		glEnd();*/
 		xPosition = -sm.X;
 		yPosition = sm.Y;
 		if (zPosition > sm.Z + 0.1 || zPosition < sm.Z - 0.1) {
@@ -945,45 +883,18 @@ int initVertexBuffer() throw (std::runtime_error)
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
 	glEnableVertexAttribArray(1);
 
-	// index buffer object (ibo) contains indices for
+	// element buffer object (ebo) contains indices for
 	// drawing cubes correctly and without repetition
-	GLuint ibo;
-	glGenBuffers(1, &ibo);
-	if (ibo == GL_INVALID_VALUE)
+	GLuint ebo;
+	glGenBuffers(1, &ebo);
+	if (ebo == GL_INVALID_VALUE)
 		throw std::runtime_error("Failed to create the element buffer object.\n");
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indeces), indeces, GL_STATIC_DRAW);
 
 	return sizeof(indeces) / sizeof(int8_t);
 }
 
-/*
-* @function initializes a Kinect sensor for use.
-* @return false if something fails, true otherwise.
-*/
-bool initKinect() {
-	// First we find an attached Kinect sensor
-	if (FAILED(GetDefaultKinectSensor(&sensor))) {
-		return false;
-	}
-	// then we initialize it and 
-	// prepare to read data from it. 
-	if (sensor) {
-		sensor->Open();
-
-		IBodyFrameSource* framesource = NULL;
-		sensor->get_BodyFrameSource(&framesource);
-		framesource->OpenReader(&reader);
-		if (framesource) {
-			framesource->Release();
-			framesource = NULL;
-		}
-		return true;
-	}
-	else {
-		return false;
-	}
-}
 
 int main(int argc, char* argv[]) {
 	if (!init(argc, argv)) {
@@ -991,18 +902,21 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	if (!initKinect()) {
-		printf("Failed to initialize Kinect sensor. \n");
+	try {
+		kinect = new KinectSensor();
+	}
+	catch (std::runtime_error e) {
+		std::cout << e.what() << std::endl;
 		return -1;
 	}
 
 	try {
 		// create shader program object
-		Shader shaderProgramXXX = Shader("vs.glsl", "fs.glsl");
+		shaderProgram = new Shader("vs.glsl", "fs.glsl");
 		// memorize ID shader program
-		shaderProgram = shaderProgramXXX.ID;
+		shaderProgramID = shaderProgram->ID;
 		// activate shader program
-		shaderProgramXXX.activate();
+		shaderProgram->activate();
 	}
 	catch (std::runtime_error e) {
 		std::cout << "Error in shaders initialization: " << e.what() << std::endl;
@@ -1029,15 +943,15 @@ int main(int argc, char* argv[]) {
 
 	// Get uniform variables location index from shaders
 	// Memorized in global vars in order to set in the future
-	u_MvIndex = glGetUniformLocation(shaderProgram, "u_MvMatrix");
-	u_PositionSystemIndex = glGetUniformLocation(shaderProgram, "u_PositionSystemMatrix");
-	u_NormalIndex = glGetUniformLocation(shaderProgram, "u_NormalMatrix");
+	u_MvIndex = glGetUniformLocation(shaderProgramID, "u_MvMatrix");
+	u_PositionSystemIndex = glGetUniformLocation(shaderProgramID, "u_PositionSystemMatrix");
+	u_NormalIndex = glGetUniformLocation(shaderProgramID, "u_NormalMatrix");
 	if (u_MvIndex == -1 || u_PositionSystemIndex == -1 || u_NormalIndex == -1) {
 		printf("Failed to load u_MvMatrix and/or u_PositionSystemMatrix and/or u_NormalMatrix. \n");
 		return -1;
 	}
 	// Memorized in local vars in order to set directly now 
-	GLuint u_ProjIndex = glGetUniformLocation(shaderProgram, "u_ProjMatrix");
+	GLuint u_ProjIndex = glGetUniformLocation(shaderProgramID, "u_ProjMatrix");
 	if (u_ProjIndex == -1) {
 		printf("Failed to load u_ProjMatrix. \n");
 		return -1;
@@ -1056,8 +970,11 @@ int main(int argc, char* argv[]) {
 
 	// Main loop
 	execute();
-	//glDeleteBuffers(1, &ID);
-	//shaderProgramXXX.deactivate();
+	// eliminate buffers in the reverse order of creation
+	if (kinect) delete kinect;
+	//glDeleteBuffers(1, &ebo);
+	//glDeleteBuffers(1, &vbo);
+	if (shaderProgram) delete shaderProgram;
 	return 0;
 }
 

@@ -12,12 +12,15 @@ std::string getFileContent(const char* filename) throw (std::runtime_error);
 
 class Shader
 {
-	public:
-		GLuint ID;
-		Shader(const char* vertexFile, const char* fragmentFile)  throw (std::runtime_error);
+public:
+	GLuint ID;
+	Shader(const char* vertexFile, const char* fragmentFile)  throw (std::runtime_error);
+	~Shader();
+	void activate();
+	
 
-		void activate();
-		void deactivate();
+private:
+	void compileErrors(unsigned int shader, const char* type) throw (std::runtime_error);
 };
 
 #endif

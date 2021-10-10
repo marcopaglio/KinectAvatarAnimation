@@ -10,7 +10,7 @@ std::string getFileContent(const char* filename) throw (std::runtime_error)
 
 	return file;
 }
-/*
+/**
 * @constructor Get shaders from file, compiling
 *				and linking them to the openGL program.
 *				If everything is ok, then it actives the program.
@@ -38,31 +38,18 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile) throw (std::run
 	ID = glCreateProgram();
 
 	// link compiled shaders
-	GLenum errorCode;
 	glAttachShader(ID, vertexShader);
-	errorCode = glGetError();
-	if (errorCode != GL_NO_ERROR)
-		throw std::runtime_error("Ver shader error: " + errorCode);
+	compileErrors(vertexShader, "VERTEX");
 	
 	glAttachShader(ID, fragmentShader);
-	errorCode = glGetError();
-	if (errorCode != GL_NO_ERROR)
-		throw std::runtime_error("Frag shader error: " + errorCode);
+	compileErrors(fragmentShader, "FRAGMENT");
 
 	glLinkProgram(ID);
+	compileErrors(ID, "PROGRAM");
 
 	// delete the now useless vertex and fragment shader objects
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
-
-	// check for errors
-	GLint params;
-	glGetProgramiv(ID, GL_LINK_STATUS, &params);
-	if (params != GL_TRUE) {
-		GLchar errorLog[1024] = { 0 };
-		glGetProgramInfoLog(ID, 1024, NULL, errorLog);
-		throw std::runtime_error(("error validating shader program; Details: %s", errorLog));
-	}
 }
 
 void Shader::activate() 
@@ -71,8 +58,34 @@ void Shader::activate()
 	glUseProgram(ID);
 }
 
-void Shader::deactivate()
+Shader::~Shader()
 {
 	// delete openGL program
 	glDeleteProgram(ID);
+}
+
+/**
+* @function check for errors occured in shader initialization
+* @params shader is ID generated from an openGL shader or program
+* @params type is "PROGRAM", "VERTEX" or "FRAGMENT"
+* @thow runtime_error if error is discovered
+*/
+void Shader::compileErrors(unsigned int shader, const char* type) throw (std::runtime_error)
+{
+	GLint params;
+	GLchar errorLog[1024] = { 0 };
+
+	if (std::strcmp("PROGRAM", type) == 0) {
+		glGetProgramiv(shader, GL_LINK_STATUS, &params);
+		if (params != GL_TRUE) {
+			glGetProgramInfoLog(shader, 1024, NULL, errorLog);
+			throw std::runtime_error(("SHADER_LINKING_ERROR for %s. Details: %s", type, errorLog));
+		}
+	} else {
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &params);
+		if (params != GL_TRUE) {
+			glGetShaderInfoLog(shader, 1024, NULL, errorLog);
+			throw std::runtime_error(("SHADER_COMPILATION_ERROR for %s. Details: %s", type, errorLog));
+		}
+	}
 }

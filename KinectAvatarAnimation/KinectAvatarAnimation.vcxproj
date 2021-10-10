@@ -145,11 +145,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="glut.cpp" />
+    <ClCompile Include="KinectSensor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glut.h" />
+    <ClInclude Include="KinectSensor.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>

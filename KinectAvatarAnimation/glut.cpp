@@ -63,7 +63,7 @@ bool init(int argc, char* argv[]) {
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(width, height);
     glutInitWindowPosition(10, 10);
-    glutCreateWindow("Avatar animation");
+    glutCreateWindow("Kinect Avatar Animation");
 
     glewInit();
     return true;
