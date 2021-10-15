@@ -17,7 +17,6 @@ public:
 	KinectSensor() throw (std::runtime_error);
 	~KinectSensor();
 	void getBodyData(BOOLEAN* tracked, Joint* joints, JointOrientation* jointOrientation);
-	
 };
 
 #endif

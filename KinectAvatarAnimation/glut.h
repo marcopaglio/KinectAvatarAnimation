@@ -5,7 +5,7 @@
 #include <gl/GLU.h>
 #include <gl/glut.h>
 
-bool init(int argc, char* argv[]);
+void init(int argc, char* argv[]);
 void draw();
 void mouse(int button, int state, int x, int y);
 void movingMouse(int x, int y);

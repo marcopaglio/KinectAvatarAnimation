@@ -144,15 +144,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Avatar.cpp" />
+    <ClCompile Include="Component.cpp" />
+    <ClCompile Include="Composite.cpp" />
     <ClCompile Include="glut.cpp" />
     <ClCompile Include="KinectSensor.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Robot.cpp" />
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Avatar.h" />
+    <ClInclude Include="Component.h" />
+    <ClInclude Include="Composite.h" />
     <ClInclude Include="glut.h" />
+    <ClInclude Include="Head.h" />
     <ClInclude Include="KinectSensor.h" />
+    <ClInclude Include="LeftArm.h" />
+    <ClInclude Include="LeftForearm.h" />
+    <ClInclude Include="LeftLeg.h" />
+    <ClInclude Include="LeftThigh.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="RightArm.h" />
+    <ClInclude Include="RightForearm.h" />
+    <ClInclude Include="RightLeg.h" />
+    <ClInclude Include="RightThigh.h" />
+    <ClInclude Include="Robot.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>

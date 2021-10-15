@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="File di componenti">
+      <UniqueIdentifier>{7266de98-68c6-47d1-8add-d6b903f1effb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -25,6 +28,18 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="KinectSensor.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Composite.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Avatar.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Robot.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Component.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -40,6 +55,45 @@
     </ClInclude>
     <ClInclude Include="KinectSensor.h">
       <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Composite.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Avatar.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Robot.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="RightArm.h">
+      <Filter>File di componenti</Filter>
+    </ClInclude>
+    <ClInclude Include="RightForearm.h">
+      <Filter>File di componenti</Filter>
+    </ClInclude>
+    <ClInclude Include="RightLeg.h">
+      <Filter>File di componenti</Filter>
+    </ClInclude>
+    <ClInclude Include="RightThigh.h">
+      <Filter>File di componenti</Filter>
+    </ClInclude>
+    <ClInclude Include="LeftThigh.h">
+      <Filter>File di componenti</Filter>
+    </ClInclude>
+    <ClInclude Include="LeftLeg.h">
+      <Filter>File di componenti</Filter>
+    </ClInclude>
+    <ClInclude Include="LeftForearm.h">
+      <Filter>File di componenti</Filter>
+    </ClInclude>
+    <ClInclude Include="LeftArm.h">
+      <Filter>File di componenti</Filter>
+    </ClInclude>
+    <ClInclude Include="Head.h">
+      <Filter>File di componenti</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

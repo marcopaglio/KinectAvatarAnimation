@@ -54,17 +54,21 @@ void execute() {
 /*
 * @function initialize a window enviroment with glut functions
 *           and openGL enviroment with glew function
-* @params argc
-*         argv
-* @return true if initialization goes well
+* @params argc is main arg UNMODIFIED
+*         argv is main arg UNMODIFIED
 */
-bool init(int argc, char* argv[]) {
+void init(int argc, char* argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+    /** GLUT_DOUBLE creates two framebuffer : 
+    *   One is used for drawing, the other one for displaying.
+    *   At the end of each frame, these buffers are swapped. 
+    *   Doing so, the view is only changed at once when a frame is finished 
+    *   and all objects are visible for the same time.
+    */
     glutInitWindowSize(width, height);
     glutInitWindowPosition(10, 10);
     glutCreateWindow("Kinect Avatar Animation");
 
     glewInit();
-    return true;
 }
