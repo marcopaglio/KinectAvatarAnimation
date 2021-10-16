@@ -43,7 +43,7 @@ void Robot::construct()
 {
 	// no parent members
 	Component* floor = new Component(glm::vec3(floor_sX, floor_sY, floor_sZ),
-									glm::vec3(initPosX, initPosY - 1.8, initPosZ),
+									glm::vec3(initPosX, initPosY - (body_sY + 2 * thigh_sY + 2 * leg_sY + floor_sY) * cubeSize, initPosZ),
 									glm::vec3(floor_rotX, floor_rotY, floor_rotZ) *= cubeSize,
 									gray);
 
@@ -121,7 +121,7 @@ void Robot::updatePosition(Joint* joints, float* xPos, float* yPos, float* zPos)
 	float newY = sm.Y;
 	float newZ = sm.Z;
 	if (*zPos > newZ + epsilon || *zPos < newZ - epsilon) {
-		bodies[0]->updateTranslate(0.0f, newY - 1.8, 0.0); //FIXME 1.8 non funziona se le gambe sono piegate
+		bodies[0]->updateTranslate(0.0f, newY - (body_sY + 2 * thigh_sY + 2 * leg_sY + floor_sY) * cubeSize, 0.0); //FIXME 1.8 non funziona se le gambe sono piegate
 	}
 	bodies[1]->updateTranslate(newX, newY, newZ);
 	*xPos = newX;

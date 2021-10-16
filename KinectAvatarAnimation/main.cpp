@@ -276,7 +276,8 @@ int main(int argc, char* argv[]) {
 
 	glm::mat4 projMatrix = glm::perspective(45.0, width / (GLdouble)height, 0.1, 1000.0);
 
-	g_ViewMatrix = glm::lookAt(glm::vec3(0.0f, 0.0f, -0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	g_ViewMatrix = glm::lookAt(glm::vec3(0.0f + xPosition, 0.0f + yPosition, -2.5f + zPosition) *= (100 * cubeSize * cubeSize), //FIXME logica
+		glm::vec3(xPosition, yPosition, zPosition - 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// Projection matrix never changes
 	glUniformMatrix4fv(u_ProjIndex, 1, GL_FALSE, glm::value_ptr(projMatrix));
