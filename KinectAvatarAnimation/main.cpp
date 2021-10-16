@@ -6,6 +6,7 @@
 #include "Shader.h"
 #include "KinectSensor.h"
 #include "Robot.h"
+#include "Camera.h"
 
 /*** GLOBAL VARIABLES ***/
 
@@ -19,7 +20,6 @@ JointOrientation jointOrientation[JointType_Count];
 
 // openGL program index
 Shader* shaderProgram;
-GLuint shaderProgramID;
 
 // Draw informations
 int n;
@@ -30,6 +30,9 @@ Avatar* avatar;
 unsigned int num_components;
 float xPosition = 0.0f, yPosition = 0.0f, zPosition = 2.0f;
 
+// Camera Variables
+Camera* camera; 
+
 // uniform variable location indeces
 GLuint u_MvIndex;
 GLuint u_PositionSystemIndex;
@@ -37,16 +40,12 @@ GLuint u_NormalIndex;
 
 // matrices used repeatedly in draw function
 glm::mat4 g_modelMatrix;
-glm::mat4 g_ViewMatrix;
 glm::mat4 g_PositionSystemMatrix;
 glm::mat4 g_NormalMatrix;
 
 // moving mouse rotation variables
 bool dragging = false;
 int lastX = -1, lastY = -1;
-float factorX = 100.0 / width;
-float factorY = 100.0 / height;
-float rotateANGLE[] = { 0.0, 0.0 };
 
 /*
 * @function check if mouse is clicked and
@@ -57,9 +56,7 @@ float rotateANGLE[] = { 0.0, 0.0 };
 */
 void movingMouseManager(int x, int y) {
 	if (dragging) {
-		rotateANGLE[0] = std::max(std::min(90.0f, rotateANGLE[0] + factorY * (y - lastY)), -90.0f);
-		rotateANGLE[1] = rotateANGLE[1] + factorX * (x - lastX);
-
+		camera->setRotationAngles(x - lastX, y - lastY);
 		draw();
 	}
 	lastX = x;
@@ -98,17 +95,12 @@ void drawKinectData() {
 	if (tracked) {
 		// update avatar data
 		avatar->updateData(joints, jointOrientation, &xPosition, &yPosition, &zPosition);
+		camera->setRotationCenter(xPosition, yPosition, zPosition);
 	} else {
 		if (wasTracked)	avatar->reset();
 	}
-
-	// set view matrix with global value of viewMatrix
-	glm::mat4 viewMatrix = g_ViewMatrix;
-	// then modified with dynamic rotational angles around x and y axes
-	viewMatrix = glm::translate(viewMatrix, glm::vec3(xPosition, yPosition, zPosition));
-	viewMatrix = glm::rotate(viewMatrix, glm::radians(rotateANGLE[0]), glm::vec3(1.0f, 0.0f, 0.0f));
-	viewMatrix = glm::rotate(viewMatrix, glm::radians(rotateANGLE[1]), glm::vec3(0.0f, 1.0f, 0.0f));
-	viewMatrix = glm::translate(viewMatrix, glm::vec3(-xPosition, -yPosition, -zPosition));
+	// get view matrix from camera
+	glm::mat4 viewMatrix = camera->getViewMatrix();
 
 	// Setting uniform model view matrix 
 	glUniformMatrix4fv(u_MvIndex, 1, GL_FALSE, glm::value_ptr(viewMatrix * g_modelMatrix));
@@ -127,7 +119,6 @@ void drawKinectData() {
 		// Setup u_PositionSystemMatrix
 		scaleMatrix = avatar->getScaleMatrix(i);
 		systemMatrix = avatar->getSystemMatrix(i);
-
 		g_PositionSystemMatrix = systemMatrix * scaleMatrix;
 		glUniformMatrix4fv(u_PositionSystemIndex, 1, GL_FALSE, glm::value_ptr(g_PositionSystemMatrix));
 
@@ -232,59 +223,57 @@ int main(int argc, char* argv[]) {
 		kinect = new KinectSensor();
 		// create shader program object
 		shaderProgram = new Shader("vs.glsl", "fs.glsl");
-		// memorize ID shader program
-		shaderProgramID = shaderProgram->ID;
 		// activate shader program
 		shaderProgram->activate();
 		// set buffers object
 		n = initVertexBuffer();
+
+		// Create Robot
+		avatar = new Robot(cubeSize, xPosition, yPosition, zPosition);
+		num_components = avatar->getNumOfComponents();
+
+		// Create Camera
+		camera = new Camera(width, height, glm::vec3(xPosition, yPosition, zPosition),
+			glm::vec3(0.0f + xPosition, 0.0f + yPosition, -2.5f + zPosition) *= (100 * cubeSize * cubeSize), //FIXME logica
+			glm::vec3(xPosition, yPosition, zPosition - 1.0f), 45.0, 0.1, 1000.0);
+
+		// OpenGL setup
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+		glClearDepth(1.0f);
+
+		// Projection matrix never changes
+		GLuint u_ProjIndex = shaderProgram->getUniformLocation("u_ProjMatrix");
+		glm::mat4 projMatrix = camera->getProjMatrix();
+		glUniformMatrix4fv(u_ProjIndex, 1, GL_FALSE, glm::value_ptr(projMatrix));
+
+		// Get uniform variables location index from shaders
+		// Memorized in global vars in order to set in the future
+		u_MvIndex = shaderProgram->getUniformLocation("u_MvMatrix");
+		u_PositionSystemIndex = shaderProgram->getUniformLocation("u_PositionSystemMatrix");
+		u_NormalIndex = shaderProgram->getUniformLocation("u_NormalMatrix");
+
+		// Setup model - view - projection (mvp) matrices
+		g_modelMatrix = glm::mat4(1.0f);
+
+		// Main loop
+		execute();
 	}
-	catch (std::runtime_error& e) {
-		std::cout << e.what() << std::endl;
+	catch (std::exception& e) {
+		// eliminate buffers in the reverse order of creation
+		if (camera) delete camera;
+		if (avatar) delete avatar;
+		if (kinect) delete kinect;
+		//glDeleteBuffers(1, &ebo);
+		//glDeleteBuffers(1, &vbo);
+		if (shaderProgram) delete shaderProgram;
+		std::cerr << e.what() << std::endl;
 		return -1;
 	}
 
-	// Create Robot
-	avatar = new Robot(cubeSize, xPosition, yPosition, zPosition);
-	num_components = avatar->getNumOfComponents();
-
-	// OpenGL setup
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
-	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-	glClearDepth(1.0f);
-
-	// Get uniform variables location index from shaders
-	// Memorized in global vars in order to set in the future
-	u_MvIndex = glGetUniformLocation(shaderProgramID, "u_MvMatrix");
-	u_PositionSystemIndex = glGetUniformLocation(shaderProgramID, "u_PositionSystemMatrix");
-	u_NormalIndex = glGetUniformLocation(shaderProgramID, "u_NormalMatrix");
-	if (u_MvIndex == -1 || u_PositionSystemIndex == -1 || u_NormalIndex == -1) {
-		std::cout << "Failed to load u_MvMatrix and/or u_PositionSystemMatrix and/or u_NormalMatrix." << std::endl;
-		return -1;
-	}
-	// Memorized in local vars in order to set directly now 
-	GLuint u_ProjIndex = glGetUniformLocation(shaderProgramID, "u_ProjMatrix");
-	if (u_ProjIndex == -1) {
-		printf("Failed to load u_ProjMatrix. \n");
-		return -1;
-	}
-
-	// Setup model - view - projection (mvp) matrices
-	g_modelMatrix = glm::mat4(1.0f);
-
-	glm::mat4 projMatrix = glm::perspective(45.0, width / (GLdouble)height, 0.1, 1000.0);
-
-	g_ViewMatrix = glm::lookAt(glm::vec3(0.0f + xPosition, 0.0f + yPosition, -2.5f + zPosition) *= (100 * cubeSize * cubeSize), //FIXME logica
-		glm::vec3(xPosition, yPosition, zPosition - 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-	// Projection matrix never changes
-	glUniformMatrix4fv(u_ProjIndex, 1, GL_FALSE, glm::value_ptr(projMatrix));
-
-	// Main loop
-	execute();
 	// eliminate buffers in the reverse order of creation
+	if (camera) delete camera;
 	if (avatar) delete avatar;
 	if (kinect) delete kinect;
 	//glDeleteBuffers(1, &ebo);

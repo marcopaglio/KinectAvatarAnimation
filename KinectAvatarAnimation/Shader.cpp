@@ -4,7 +4,7 @@ std::string getFileContent(const char* filename) throw (std::runtime_error)
 {
 	std::ifstream fileSource(filename);
 	if (!fileSource) {
-		throw std::runtime_error("failed to open ifstream");
+		throw std::runtime_error("Failed to open ifstream \n");
 	}
 	std::string file((std::istreambuf_iterator<char>(fileSource)), (std::istreambuf_iterator<char>()));
 
@@ -56,6 +56,15 @@ void Shader::activate()
 {
 	// activate openGL program
 	glUseProgram(ID);
+}
+
+GLuint Shader::getUniformLocation(const char* uniform) throw (std::runtime_error)
+{
+	GLuint u_index = glGetUniformLocation(ID, uniform);
+	if (u_index == -1) {
+		throw std::runtime_error(("Failed to load %s.", uniform));
+	}
+	return u_index;
 }
 
 Shader::~Shader()

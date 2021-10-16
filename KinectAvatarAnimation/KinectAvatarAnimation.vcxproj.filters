@@ -42,6 +42,9 @@
     <ClCompile Include="Component.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glut.h">
@@ -94,6 +97,9 @@
     </ClInclude>
     <ClInclude Include="Head.h">
       <Filter>File di componenti</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -12,15 +12,16 @@ std::string getFileContent(const char* filename) throw (std::runtime_error);
 
 class Shader
 {
-public:
+private:
 	GLuint ID;
+	void compileErrors(unsigned int shader, const char* type) throw (std::runtime_error);
+
+public:
 	Shader(const char* vertexFile, const char* fragmentFile)  throw (std::runtime_error);
 	~Shader();
 	void activate();
-	
 
-private:
-	void compileErrors(unsigned int shader, const char* type) throw (std::runtime_error);
+	GLuint getUniformLocation(const char* uniform) throw (std::runtime_error);
 };
 
 #endif
