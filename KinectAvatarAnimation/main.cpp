@@ -22,8 +22,13 @@ JointOrientation jointOrientation[JointType_Count];
 Shader* shaderProgram;
 
 // Draw informations
+GLuint positionIndex = 0;
+GLuint normalIndex = 1;
+GLuint colorIndex = 2;
+GLuint vbo;
+GLuint ebo;
 int n;
-float cubeSize = 0.1;
+float cubeSize = 1.0;
 
 // Avatar Variables
 Avatar* avatar;
@@ -34,14 +39,19 @@ float xPosition = 0.0f, yPosition = 0.0f, zPosition = 2.0f;
 Camera* camera; 
 
 // uniform variable location indeces
-GLuint u_MvIndex;
-GLuint u_PositionSystemIndex;
+GLuint u_ModelIndex;
+GLuint u_ViewIndex;
 GLuint u_NormalIndex;
+GLuint u_LightDiffuseRightIndex;
+GLuint u_LightDiffuseLeftIndex;
+GLuint u_LightDirectionalIndex;
+GLuint u_LightColorIndex;
 
-// matrices used repeatedly in draw function
-glm::mat4 g_modelMatrix;
-glm::mat4 g_PositionSystemMatrix;
-glm::mat4 g_NormalMatrix;
+// matrices for light
+glm::vec3 g_LightDiffuseRight = glm::vec3(-1.0f + xPosition, 0.0f + yPosition, -2.5f + zPosition) *= (100 * cubeSize * cubeSize);
+glm::vec3 g_LightDiffuseLeft = glm::vec3(1.0f + xPosition, 0.0f + yPosition, -2.5f + zPosition) *= (100 * cubeSize * cubeSize);
+glm::vec3 g_LightDirectional = glm::vec3(0.0f + xPosition, 1.3f + yPosition, -2.0f + zPosition) *= (100 * cubeSize * cubeSize);
+glm::vec3 g_LightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
 // moving mouse rotation variables
 bool dragging = false;
@@ -102,30 +112,37 @@ void drawKinectData() {
 	// get view matrix from camera
 	glm::mat4 viewMatrix = camera->getViewMatrix();
 
-	// Setting uniform model view matrix 
-	glUniformMatrix4fv(u_MvIndex, 1, GL_FALSE, glm::value_ptr(viewMatrix * g_modelMatrix));
+	// Setting uniform view and light matrices 
+	glUniformMatrix4fv(u_ViewIndex, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	//glUniform3fv(u_LightDiffuseRightIndex, 1, glm::value_ptr(glm::vec3(viewMatrix * glm::vec4(g_LightDiffuseRight, 0.0))));
+	//glUniform3fv(u_LightDiffuseLeftIndex, 1, glm::value_ptr(glm::vec3(viewMatrix * glm::vec4(g_LightDiffuseLeft, 0.0))));
 
 	// Clear color and depth buffer bits
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Draw every component separately
 	glm::vec3 color;
-	glm::mat4 systemMatrix, scaleMatrix;
+	glm::mat4 modelMatrix;
+	glm::mat4 normalMatrix;
 	for (int i = 0; i < num_components; i++) {
 		// Setup a_Color
 		color = avatar->getRgbColor(i);
-		glVertexAttrib3f(2, color[0], color[1], color[2]);
+		glVertexAttrib3f(colorIndex, color[0], color[1], color[2]);
 
-		// Setup u_PositionSystemMatrix
-		scaleMatrix = avatar->getScaleMatrix(i);
-		systemMatrix = avatar->getSystemMatrix(i);
-		g_PositionSystemMatrix = systemMatrix * scaleMatrix;
-		glUniformMatrix4fv(u_PositionSystemIndex, 1, GL_FALSE, glm::value_ptr(g_PositionSystemMatrix));
+		// Setup Model Matrix
+		modelMatrix = avatar->getSystemMatrix(i) * avatar->getScaleMatrix(i);
+		glUniformMatrix4fv(u_ModelIndex, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
 
 		// Setup u_NormalMatrix
-		g_NormalMatrix = glm::inverse(g_modelMatrix * g_PositionSystemMatrix); //FIXME model * translate * rotation  NO scale
-		g_NormalMatrix = glm::transpose(g_NormalMatrix);
-		glUniformMatrix4fv(u_NormalIndex, 1, GL_FALSE, glm::value_ptr(g_NormalMatrix));
+		/***	Calculating normalMatrix require:							***/
+		/***	- scaleMatrix  => dimension propagation.					***/
+		/***	- systemMatrix => static position.							***/
+		/***	ALTERNATIVE													***/
+		/***	- viewMatrix   => dynamic position (like camera lights).	***/
+		normalMatrix = glm::inverse(/*viewMatrix **/ modelMatrix);
+		normalMatrix = glm::transpose(normalMatrix);
+		glUniformMatrix4fv(u_NormalIndex, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
 		// Draw from indices
 		glDrawElements(GL_TRIANGLES, n, GL_UNSIGNED_BYTE, 0);
@@ -155,27 +172,27 @@ int initVertexBuffer() throw (std::runtime_error)
 		  cubeSize, -cubeSize,  cubeSize,  1.0,  0.0,  0.0,
 		  cubeSize, -cubeSize, -cubeSize,  1.0,  0.0,  0.0,
 		  cubeSize,  cubeSize, -cubeSize,  1.0,  0.0,  0.0,
-		  // v0-v5-v6-v1 up
-		   cubeSize,  cubeSize,  cubeSize,  0.0, -1.0,  0.0,
-		   cubeSize,  cubeSize, -cubeSize,  0.0, -1.0,  0.0,
-		  -cubeSize,  cubeSize, -cubeSize,  0.0, -1.0,  0.0,
-		  -cubeSize,  cubeSize,  cubeSize,  0.0, -1.0,  0.0,
-		  // v1-v6-v7-v2 left
-		  -cubeSize,  cubeSize,  cubeSize, -1.0,  0.0,  0.0,
-		  -cubeSize,  cubeSize, -cubeSize, -1.0,  0.0,  0.0,
-		  -cubeSize, -cubeSize, -cubeSize, -1.0,  0.0,  0.0,
-		  -cubeSize, -cubeSize,  cubeSize, -1.0,  0.0,  0.0,
-		  // v7-v4-v3-v2 down
-		  -cubeSize, -cubeSize, -cubeSize,  0.0,  1.0,  0.0,
-		   cubeSize, -cubeSize, -cubeSize,  0.0,  1.0,  0.0,
-		   cubeSize, -cubeSize,  cubeSize,  0.0,  1.0,  0.0,
-		  -cubeSize, -cubeSize,  cubeSize,  0.0,  1.0,  0.0,
-		  // v4-v7-v6-v5 back
-		   cubeSize, -cubeSize, -cubeSize,  0.0,  0.0, -1.0,
-		  -cubeSize, -cubeSize, -cubeSize,  0.0,  0.0, -1.0,
-		  -cubeSize,  cubeSize, -cubeSize,  0.0,  0.0, -1.0,
-		   cubeSize,  cubeSize, -cubeSize,  0.0,  0.0, -1.0
-	}; //FIXME adjust normals
+		 // v0-v5-v6-v1 up
+		  cubeSize,  cubeSize,  cubeSize,  0.0,  1.0,  0.0,
+		  cubeSize,  cubeSize, -cubeSize,  0.0,  1.0,  0.0,
+		 -cubeSize,  cubeSize, -cubeSize,  0.0,  1.0,  0.0,
+		 -cubeSize,  cubeSize,  cubeSize,  0.0,  1.0,  0.0,
+		 // v1-v6-v7-v2 left
+		 -cubeSize,  cubeSize,  cubeSize, -1.0,  0.0,  0.0,
+		 -cubeSize,  cubeSize, -cubeSize, -1.0,  0.0,  0.0,
+		 -cubeSize, -cubeSize, -cubeSize, -1.0,  0.0,  0.0,
+		 -cubeSize, -cubeSize,  cubeSize, -1.0,  0.0,  0.0,
+		 // v7-v4-v3-v2 down
+		 -cubeSize, -cubeSize, -cubeSize,  0.0, -1.0,  0.0,
+		  cubeSize, -cubeSize, -cubeSize,  0.0, -1.0,  0.0,
+		  cubeSize, -cubeSize,  cubeSize,  0.0, -1.0,  0.0,
+		 -cubeSize, -cubeSize,  cubeSize,  0.0, -1.0,  0.0,
+		 // v4-v7-v6-v5 back
+		  cubeSize, -cubeSize, -cubeSize,  0.0,  0.0, -1.0,
+		 -cubeSize, -cubeSize, -cubeSize,  0.0,  0.0, -1.0,
+		 -cubeSize,  cubeSize, -cubeSize,  0.0,  0.0, -1.0,
+		  cubeSize,  cubeSize, -cubeSize,  0.0,  0.0, -1.0
+	};
 
 	uint8_t indeces[] = {
 		 0,  1,  2,   0,  2,  3,    // front
@@ -189,7 +206,6 @@ int initVertexBuffer() throw (std::runtime_error)
 	//VAO is eliminated because this project doesn't need to change vbo or ebo
 
 	// vertex buffer object (vbo) contains vertex attributes
-	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	if (vbo == GL_INVALID_VALUE)
 		throw std::runtime_error("Error in vertex buffers initialization : failed to create the vertex buffer object.\n");
@@ -197,14 +213,13 @@ int initVertexBuffer() throw (std::runtime_error)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesNormals), verticesNormals, GL_STATIC_DRAW);
 
 	// infos are stored in vao
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
-	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(positionIndex, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glEnableVertexAttribArray(positionIndex);
+	glVertexAttribPointer(normalIndex, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
+	glEnableVertexAttribArray(normalIndex);
 
 	// element buffer object (ebo) contains indices for
 	// drawing cubes correctly and without repetition
-	GLuint ebo;
 	glGenBuffers(1, &ebo);
 	if (ebo == GL_INVALID_VALUE)
 		throw std::runtime_error("Error in vertex buffers initialization : failed to create the element buffer object.\n");
@@ -234,7 +249,7 @@ int main(int argc, char* argv[]) {
 
 		// Create Camera
 		camera = new Camera(width, height, glm::vec3(xPosition, yPosition, zPosition),
-			glm::vec3(0.0f + xPosition, 0.0f + yPosition, -2.5f + zPosition) *= (100 * cubeSize * cubeSize), //FIXME logica
+			glm::vec3(0.0f + xPosition, 0.0f + yPosition, -3.5f + zPosition) *= (100 * cubeSize * cubeSize), //FIXME logica
 			glm::vec3(xPosition, yPosition, zPosition - 1.0f), 45.0, 0.1, 1000.0);
 
 		// OpenGL setup
@@ -245,17 +260,23 @@ int main(int argc, char* argv[]) {
 
 		// Projection matrix never changes
 		GLuint u_ProjIndex = shaderProgram->getUniformLocation("u_ProjMatrix");
-		glm::mat4 projMatrix = camera->getProjMatrix();
-		glUniformMatrix4fv(u_ProjIndex, 1, GL_FALSE, glm::value_ptr(projMatrix));
+		glUniformMatrix4fv(u_ProjIndex, 1, GL_FALSE, glm::value_ptr(camera->getProjMatrix()));
 
 		// Get uniform variables location index from shaders
 		// Memorized in global vars in order to set in the future
-		u_MvIndex = shaderProgram->getUniformLocation("u_MvMatrix");
-		u_PositionSystemIndex = shaderProgram->getUniformLocation("u_PositionSystemMatrix");
+		u_ModelIndex = shaderProgram->getUniformLocation("u_ModelMatrix");
+		u_ViewIndex = shaderProgram->getUniformLocation("u_ViewMatrix");
 		u_NormalIndex = shaderProgram->getUniformLocation("u_NormalMatrix");
-
-		// Setup model - view - projection (mvp) matrices
-		g_modelMatrix = glm::mat4(1.0f);
+		u_LightDiffuseRightIndex = shaderProgram->getUniformLocation("u_LightDiffuseRight");
+		u_LightDiffuseLeftIndex = shaderProgram->getUniformLocation("u_LightDiffuseLeft");
+		u_LightDirectionalIndex = shaderProgram->getUniformLocation("u_LightDirectional");
+		u_LightColorIndex = shaderProgram->getUniformLocation("u_LightColor");
+	
+		/***	FIXED: second argument is number of triplets to set. In this case is just one.	***/
+		glUniform3fv(u_LightDiffuseRightIndex, 1, glm::value_ptr(g_LightDiffuseRight));
+		glUniform3fv(u_LightDiffuseLeftIndex, 1, glm::value_ptr(g_LightDiffuseLeft));
+		glUniform3fv(u_LightDirectionalIndex, 1, glm::value_ptr(g_LightDirectional));
+		glUniform3fv(u_LightColorIndex, 1, glm::value_ptr(g_LightColor));
 
 		// Main loop
 		execute();
@@ -265,8 +286,8 @@ int main(int argc, char* argv[]) {
 		if (camera) delete camera;
 		if (avatar) delete avatar;
 		if (kinect) delete kinect;
-		//glDeleteBuffers(1, &ebo);
-		//glDeleteBuffers(1, &vbo);
+		glDeleteBuffers(1, &ebo);
+		glDeleteBuffers(1, &vbo);
 		if (shaderProgram) delete shaderProgram;
 		std::cerr << e.what() << std::endl;
 		return -1;
@@ -276,8 +297,8 @@ int main(int argc, char* argv[]) {
 	if (camera) delete camera;
 	if (avatar) delete avatar;
 	if (kinect) delete kinect;
-	//glDeleteBuffers(1, &ebo);
-	//glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &ebo);
+	glDeleteBuffers(1, &vbo);
 	if (shaderProgram) delete shaderProgram;
 	return 0;
 }
