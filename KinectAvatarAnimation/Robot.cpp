@@ -14,11 +14,13 @@ const float Robot::floor_sX = 50.0, Robot::floor_sY = 10.0, Robot::floor_sZ = 50
 const float Robot::body_sX = 2.0, Robot::body_sY = 3.0, Robot::body_sZ = 1.0;
 
 const float Robot::head_sX = 1.0, Robot::head_sY = 1.0, Robot::head_sZ = 1.0;
-const float Robot::arm_sX = 1.5, Robot::arm_sY = 0.5, Robot::arm_sZ = 1.0;
-const float Robot::thigh_sX = 0.75, Robot::thigh_sY = 1.5, Robot::thigh_sZ = 1.0;
+const float Robot::arm_sX = 1.2, Robot::arm_sY = 0.5, Robot::arm_sZ = 0.75;
+//const float Robot::arm_sX = 0.5, Robot::arm_sY = 1.2, Robot::arm_sZ = 0.75;
+const float Robot::thigh_sX = 0.75, Robot::thigh_sY = 1.5, Robot::thigh_sZ = 0.75;
 
-const float Robot::forearm_sX = 1.0, Robot::forearm_sY = 0.5, Robot::forearm_sZ = 1.0;
-const float Robot::leg_sX = 0.5, Robot::leg_sY = 1.0, Robot::leg_sZ = 1.0;
+const float Robot::forearm_sX = 1.5, Robot::forearm_sY = 0.5, Robot::forearm_sZ = 0.5;
+//const float Robot::forearm_sX = 0.5, Robot::forearm_sY = 1.5, Robot::forearm_sZ = 0.5;
+const float Robot::leg_sX = 0.5, Robot::leg_sY = 1.5, Robot::leg_sZ = 0.5;
 
 // bodies fulcrum point (for rotation purpose)
 // where to point center in order to get the right rotation
@@ -27,9 +29,11 @@ const float Robot::body_rotX = 0.0, Robot::body_rotY = 0.0, Robot::body_rotZ = 0
 
 const float Robot::head_rotX = 0.0, Robot::head_rotY = 0.0, Robot::head_rotZ = 0.0;
 const float Robot::arm_rotX = arm_sX, Robot::arm_rotY = arm_sY, Robot::arm_rotZ = 0.0;
+//const float Robot::arm_rotX = arm_sX, Robot::arm_rotY = -arm_sY, Robot::arm_rotZ = 0.0;
 const float Robot::thigh_rotX = 0.0, Robot::thigh_rotY = -thigh_sY, Robot::thigh_rotZ = thigh_sZ;
 
 const float Robot::forearm_rotX = forearm_sX, Robot::forearm_rotY = forearm_sY, Robot::forearm_rotZ = 0.0;
+//const float Robot::forearm_rotX = forearm_sX, Robot::forearm_rotY = -forearm_sY, Robot::forearm_rotZ = 0.0;
 const float Robot::leg_rotX = 0.0, Robot::leg_rotY = -leg_sY, Robot::leg_rotZ = leg_sZ;
 
 
@@ -47,6 +51,12 @@ void Robot::construct()
 									glm::vec3(floor_rotX, floor_rotY, floor_rotZ) *= cubeSize,
 									gray);
 
+	/*Component* body = new Body(nullptr, JointType_SpineMid, JointType_SpineBase,
+		glm::vec3(body_sX, body_sY, body_sZ),
+		glm::vec3(initPosX, initPosY, initPosZ),
+		glm::vec3(body_rotX, body_rotY, body_rotZ) *= cubeSize,
+		black);
+*/
 	Component* body = new Component(glm::vec3(body_sX, body_sY, body_sZ),
 									glm::vec3(initPosX, initPosY, initPosZ),
 									glm::vec3(body_rotX, body_rotY, body_rotZ) *= cubeSize,
@@ -62,12 +72,14 @@ void Robot::construct()
 	Component* leftArm = new LeftArm(body, JointType_ShoulderLeft, JointType_ElbowLeft,
 		glm::vec3(arm_sX, arm_sY, arm_sZ),
 		glm::vec3((body_sX + arm_sX), (body_sY + arm_sY), 0.0f) *= cubeSize,
+		//glm::vec3((body_sX + arm_sX), (body_sY - arm_sY), 0.0f) *= cubeSize,
 		glm::vec3(arm_rotX, arm_rotY, arm_rotZ) *= cubeSize,
 		red);
 
 	Component* rightArm = new RightArm(body, JointType_ShoulderRight, JointType_ElbowRight,
 		glm::vec3(arm_sX, arm_sY, arm_sZ),
 		glm::vec3(-(body_sX + arm_sX), (body_sY + arm_sY), 0.0f) *= cubeSize,
+		//glm::vec3(-(body_sX + arm_sX), (body_sY - arm_sY), 0.0f) *= cubeSize,
 		glm::vec3(-arm_rotX, arm_rotY, arm_rotZ) *= cubeSize,
 		green);
 
@@ -87,6 +99,7 @@ void Robot::construct()
 	Component* leftForearm = new LeftForearm(leftArm, JointType_ElbowLeft, JointType_WristLeft,
 		glm::vec3(forearm_sX, forearm_sY, forearm_sZ),
 		glm::vec3((arm_sX + forearm_sX), 0.0f, 0.0f) *= cubeSize,
+		//glm::vec3(0.0f, -(arm_sY + forearm_sY), 0.0f) *= cubeSize,
 		glm::vec3(forearm_rotX, forearm_rotY, forearm_rotZ) *= cubeSize,
 		white);
 
@@ -94,6 +107,7 @@ void Robot::construct()
 	Component* rightForearm = new RightForearm(rightArm, JointType_ElbowRight, JointType_WristRight,
 		glm::vec3(forearm_sX, forearm_sY, forearm_sZ),
 		glm::vec3(-(arm_sX + forearm_sX), 0.0f, 0.0f) *= cubeSize,
+		//glm::vec3(0.0f, -(arm_sY + forearm_sY), 0.0f) *= cubeSize,
 		glm::vec3(-forearm_rotX, forearm_rotY, forearm_rotZ) *= cubeSize,
 		white);
 
@@ -129,10 +143,13 @@ void Robot::updatePosition(Joint* joints, float* xPos, float* yPos, float* zPos)
 	*zPos = newZ;
 }
 
-void Robot::reset()
+void Robot::reset(float* xPos, float* yPos, float* zPos)
 {
 	for (unsigned int i = 0; i < n_components; i++) {
 		if (bodies[i]) delete bodies[i];
 	}
 	construct();
+	*xPos = initPosX;
+	*yPos = initPosY;
+	*zPos = initPosZ;
 }

@@ -11,8 +11,9 @@ public:
 		Composite(parent, parentJoint, thisJoint, scaleVector, translateVector, rotPoint, color) { }
 
 protected:
-	void setRotationAngles(bool* changed) override
+	bool setRotationAngles() override
 	{
+		bool changed = false;
 		float radAngleX, radAngleZ;
 		float rX, rY, rZ;
 		rX = fulcrumPosition.X - extremityPosition.X;
@@ -22,7 +23,7 @@ protected:
 		radAngleX = std::atan(rZ / (rY + epsilon)) - parent->getPitchAngle();
 		// check if changed enough and not too much
 		if (std::abs(radAngleX - pitchAngle) < M_PI / 3) {	// pi/3 == 60°
-			*changed = true;
+			changed = true;
 
 			// update global values
 			pitchAngle = radAngleX;
@@ -30,11 +31,13 @@ protected:
 
 		radAngleZ = std::atan(rX / (rY + epsilon)) - parent->getRollAngle();
 		if (std::abs(radAngleZ - rollAngle) < M_PI / 3) {	// pi/3 == 60°
-			*changed = true;
+			changed = true;
 
 			// update global values
 			rollAngle = radAngleZ;
 		}
+
+		return changed;
 	}
 };
 

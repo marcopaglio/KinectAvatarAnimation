@@ -101,6 +101,9 @@
     <ClInclude Include="Camera.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="Body.h">
+      <Filter>File di componenti</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="fs.glsl" />

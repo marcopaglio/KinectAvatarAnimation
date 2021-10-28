@@ -1,15 +1,15 @@
-#ifndef HEAD_CLASS_H
-#define HEAD_CLASS_H
+#ifndef BODY_CLASS_H
+#define BODY_CLASS_H
 
 #include "Composite.h"
 
-class Head final : public Composite
+class Body final : public Composite
 {
 private:
 	Vector4 orientation = Vector4();
 
 public:
-	Head(Component* parent, JointType parentJoint, JointType thisJoint,
+	Body(Component* parent, JointType parentJoint, JointType thisJoint,
 		glm::vec3 scaleVector, glm::vec3 translateVector, glm::vec3 rotPoint, glm::vec3 color) :
 		Composite(parent, parentJoint, thisJoint, scaleVector, translateVector, rotPoint, color) { }
 

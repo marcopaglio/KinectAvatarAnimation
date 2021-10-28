@@ -28,7 +28,7 @@ GLuint colorIndex = 2;
 GLuint vbo;
 GLuint ebo;
 int n;
-float cubeSize = 1.0;
+float cubeSize = 0.1;
 
 // Avatar Variables
 Avatar* avatar;
@@ -107,7 +107,10 @@ void drawKinectData() {
 		avatar->updateData(joints, jointOrientation, &xPosition, &yPosition, &zPosition);
 		camera->setRotationCenter(xPosition, yPosition, zPosition);
 	} else {
-		if (wasTracked)	avatar->reset();
+		if (wasTracked) {
+			avatar->reset(&xPosition, &yPosition, &zPosition);
+			camera->setRotationCenter(xPosition, yPosition, zPosition);
+		}
 	}
 	// get view matrix from camera
 	glm::mat4 viewMatrix = camera->getViewMatrix();
@@ -132,7 +135,6 @@ void drawKinectData() {
 		// Setup Model Matrix
 		modelMatrix = avatar->getSystemMatrix(i) * avatar->getScaleMatrix(i);
 		glUniformMatrix4fv(u_ModelIndex, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
 
 		// Setup u_NormalMatrix
 		/***	Calculating normalMatrix require:							***/
@@ -249,7 +251,7 @@ int main(int argc, char* argv[]) {
 
 		// Create Camera
 		camera = new Camera(width, height, glm::vec3(xPosition, yPosition, zPosition),
-			glm::vec3(0.0f + xPosition, 0.0f + yPosition, -3.5f + zPosition) *= (100 * cubeSize * cubeSize), //FIXME logica
+			glm::vec3(0.0f + xPosition, 0.0f + yPosition, -3.5f + zPosition) *= (100 * cubeSize * cubeSize),
 			glm::vec3(xPosition, yPosition, zPosition - 1.0f), 45.0, 0.1, 1000.0);
 
 		// OpenGL setup
@@ -272,7 +274,7 @@ int main(int argc, char* argv[]) {
 		u_LightDirectionalIndex = shaderProgram->getUniformLocation("u_LightDirectional");
 		u_LightColorIndex = shaderProgram->getUniformLocation("u_LightColor");
 	
-		/***	FIXED: second argument is number of triplets to set. In this case is just one.	***/
+		/***	Second argument is number of triplets to set. In this case is just one.	***/
 		glUniform3fv(u_LightDiffuseRightIndex, 1, glm::value_ptr(g_LightDiffuseRight));
 		glUniform3fv(u_LightDiffuseLeftIndex, 1, glm::value_ptr(g_LightDiffuseLeft));
 		glUniform3fv(u_LightDirectionalIndex, 1, glm::value_ptr(g_LightDirectional));

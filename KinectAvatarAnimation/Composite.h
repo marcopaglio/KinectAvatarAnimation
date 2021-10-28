@@ -1,5 +1,5 @@
-#ifndef BODY_CLASS_H
-#define BODY_CLASS_H
+#ifndef COMPOSITE_CLASS_H
+#define COMPOSITE_CLASS_H
 
 #include "Component.h"
 
@@ -18,7 +18,13 @@ protected:
 	CameraSpacePoint extremityPosition;
 	TrackingState extremityState;
 
-	virtual void setRotationAngles(bool* changed) = 0;
+	/**
+	* @function use fulcrum and extremity informations
+	*			to set new values for rotation angles
+	* @return true if at least an angles is modified,
+	*		  false otherwise.
+	*/
+	virtual bool setRotationAngles() = 0;
 
 public:
 	Composite(Component* parent, JointType parentJoint, JointType thisJoint, 

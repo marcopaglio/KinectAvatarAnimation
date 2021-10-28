@@ -26,10 +26,10 @@ public:
 	glm::vec3 getRgbColor(unsigned int indexNumber) throw (std::out_of_range);
 	glm::mat4 getScaleMatrix(unsigned int indexNumber) throw (std::out_of_range);
 	glm::mat4 getSystemMatrix(unsigned int indexNumber) throw (std::out_of_range);
-	const unsigned int getNumOfComponents();
+	unsigned int getNumOfComponents() const;
 	void updateData(Joint* joints, JointOrientation* jointOrientation,
 		float* xPos, float* yPos, float* zPos);
-	virtual void reset() = 0;
+	virtual void reset(float* xPos, float* yPos, float* zPos) = 0;
 };
 
 #endif

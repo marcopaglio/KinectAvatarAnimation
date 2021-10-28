@@ -8,11 +8,13 @@
 
 class Component
 {
-protected:
+private:
 	glm::mat4 scaleMatrix;
+	glm::vec3 rgbColor;
+
+protected:
 	glm::mat4 rotationMatrix;
 
-	glm::vec3 rgbColor;
 	glm::vec3 rotationPoint;
 	glm::vec3 translate;
 	float pitchAngle, yawAngle, rollAngle;
@@ -24,8 +26,8 @@ protected:
 public:
 	Component(glm::vec3 scaleVector, glm::vec3 translateVector, glm::vec3 rotPoint, glm::vec3 color);
 
-	glm::mat4 getScaleMatrix();
-	glm::vec3 getRgbColor();
+	glm::mat4 getScaleMatrix() const;
+	glm::vec3 getRgbColor() const;
 	float getPitchAngle() const;
 	float getYawAngle() const;
 	float getRollAngle() const;

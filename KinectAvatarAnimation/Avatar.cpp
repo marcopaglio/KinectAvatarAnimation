@@ -40,7 +40,7 @@ glm::vec3 Avatar::getRgbColor(unsigned int indexNumber) throw (std::out_of_range
 		std::to_string(indexNumber) + " is out of range : max value = " + std::to_string(n_components - 1)));
 }
 
-const unsigned int Avatar::getNumOfComponents()
+unsigned int Avatar::getNumOfComponents() const
 {
 	return n_components;
 }

@@ -10,7 +10,6 @@ Composite::Composite(Component* parent, JointType parentJoint, JointType thisJoi
 
 void Composite::updateRotationAngles(Joint* joints, JointOrientation* jointOrientation)
 {
-	bool changed = false;
 	fulcrumPosition = joints[fulcrum].Position;
 	fulcrumState = joints[fulcrum].TrackingState;
 	extremityPosition = joints[extremity].Position;
@@ -18,20 +17,18 @@ void Composite::updateRotationAngles(Joint* joints, JointOrientation* jointOrien
 
 	if (fulcrumState == TrackingState_Tracked &&
 		extremityState == TrackingState_Tracked) {
-		setRotationAngles(&changed);
-	}
-
-	if (changed) {
-		updateRotationMatrix();
+		if (setRotationAngles())	updateRotationMatrix();
 	}
 }
 
 glm::mat4 Composite::getSystemMatrix()
 {
-	return parent->getSystemMatrix() * Component::getSystemMatrix();
+	if (parent) return parent->getSystemMatrix() * Component::getSystemMatrix();
+	else return Component::getSystemMatrix();
+	//return parent->getSystemMatrix() * Component::getSystemMatrix();
 }
 
 Composite::~Composite()
 {
-	delete parent;
+	if (parent) delete parent;
 }

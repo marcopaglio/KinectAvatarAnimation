@@ -13,7 +13,7 @@ Component::Component(glm::vec3 scaleVector,	glm::vec3 translateVector, glm::vec3
 	updateRotationMatrix();
 }
 
-glm::mat4 Component::getScaleMatrix()
+glm::mat4 Component::getScaleMatrix() const
 {
 	return scaleMatrix;
 }
@@ -50,7 +50,7 @@ void Component::updateTranslate(float x, float y, float z)
 	translate = glm::vec3(x, y, z);
 }
 
-glm::vec3 Component::getRgbColor()
+glm::vec3 Component::getRgbColor() const
 {
 	return rgbColor;
 }

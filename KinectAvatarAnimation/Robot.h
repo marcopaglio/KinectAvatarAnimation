@@ -3,6 +3,7 @@
 
 #include "Avatar.h"
 #include "Composite.h"
+#include "Body.h"
 #include "Head.h"
 #include "LeftArm.h"
 #include "RightArm.h"
@@ -45,7 +46,7 @@ protected:
 public:
 	Robot(float cubeSize, float xPos, float yPos, float zPos);
 	void updatePosition(Joint* joints, float* xPos, float* yPos, float* zPos) override;
-	virtual void reset() override;
+	virtual void reset(float* xPos, float* yPos, float* zPos) override;
 };
 
 #endif
