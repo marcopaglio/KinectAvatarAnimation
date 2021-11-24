@@ -1,14 +1,14 @@
 #ifndef RIGHTLEG_CLASS_H
 #define RIGHTLEG_CLASS_H
 
-#include "Composite.h"
+#include "ComponentKinect.h"
 
-class RightLeg final : public Composite
+class RightLeg final : public ComponentKinect
 {
 public:
 	RightLeg(Component* parent, JointType parentJoint, JointType thisJoint,
 		glm::vec3 scaleVector, glm::vec3 translateVector, glm::vec3 rotPoint, glm::vec3 color) :
-		Composite(parent, parentJoint, thisJoint, scaleVector, translateVector, rotPoint, color) { }
+		ComponentKinect(parent, parentJoint, thisJoint, scaleVector, translateVector, rotPoint, color) { }
 
 protected:
 	bool setRotationAngles() override

@@ -1,14 +1,14 @@
 #ifndef LEFTTHIGH_CLASS_H
 #define LEFTTHIGH_CLASS_H
 
-#include "Composite.h"
+#include "ComponentKinect.h"
 
-class LeftThigh final : public Composite
+class LeftThigh final : public ComponentKinect
 {
 public:
 	LeftThigh(Component* parent, JointType parentJoint, JointType thisJoint,
 		glm::vec3 scaleVector, glm::vec3 translateVector, glm::vec3 rotPoint, glm::vec3 color) :
-		Composite(parent, parentJoint, thisJoint, scaleVector, translateVector, rotPoint, color) { }
+		ComponentKinect(parent, parentJoint, thisJoint, scaleVector, translateVector, rotPoint, color) { }
 
 protected:
 	bool setRotationAngles() override

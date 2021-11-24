@@ -1,14 +1,14 @@
 #ifndef LEFTARM_CLASS_H
 #define LEFTARM_CLASS_H
 
-#include "Composite.h"
+#include "ComponentKinect.h"
 
-class LeftArm final : public Composite
+class LeftArm final : public ComponentKinect
 {
 public:
 	LeftArm(Component* parent, JointType parentJoint, JointType thisJoint,
 		glm::vec3 scaleVector, glm::vec3 translateVector, glm::vec3 rotPoint, glm::vec3 color) :
-		Composite(parent, parentJoint, thisJoint, scaleVector, translateVector, rotPoint, color) { }
+		ComponentKinect(parent, parentJoint, thisJoint, scaleVector, translateVector, rotPoint, color) { }
 
 protected:
 	bool setRotationAngles() override

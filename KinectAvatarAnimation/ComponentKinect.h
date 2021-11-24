@@ -1,15 +1,14 @@
-#ifndef COMPOSITE_CLASS_H
-#define COMPOSITE_CLASS_H
+#ifndef COMPONENT_KINECT_CLASS_H
+#define COMPONENT_KINECT_CLASS_H
 
 #include "Component.h"
 
 constexpr auto M_PI = 3.14159265358979323846f;
 constexpr auto epsilon = 0.001f;
 
-class Composite : public Component
+class ComponentKinect : public Component
 {
 protected:
-	Component* parent;
 	JointType fulcrum;
 	JointType extremity;
 
@@ -27,12 +26,10 @@ protected:
 	virtual bool setRotationAngles() = 0;
 
 public:
-	Composite(Component* parent, JointType parentJoint, JointType thisJoint, 
+	ComponentKinect(Component* parent, JointType parentJoint, JointType thisJoint, 
 		glm::vec3 scaleVector, glm::vec3 translateVector, glm::vec3 rotPoint, glm::vec3 color);
-	~Composite();
 
 	void updateRotationAngles(Joint* joints, JointOrientation* jointOrientation) override;
-	glm::mat4 getSystemMatrix() override;
 };
 
 #endif

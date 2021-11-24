@@ -1,7 +1,8 @@
 #include "Component.h"
 
-Component::Component(glm::vec3 scaleVector,	glm::vec3 translateVector, glm::vec3 rotPoint, glm::vec3 color)
+Component::Component(Component* parent, glm::vec3 scaleVector,	glm::vec3 translateVector, glm::vec3 rotPoint, glm::vec3 color)
 {
+	this->parent = parent;
 	this->rgbColor = glm::vec3(color);
 	this->translate = glm::vec3(translateVector);
 	this->rotationPoint = glm::vec3(rotPoint);
@@ -20,7 +21,9 @@ glm::mat4 Component::getScaleMatrix() const
 
 glm::mat4 Component::getSystemMatrix()
 {
-	return glm::translate(glm::mat4(1.0f), translate) * rotationMatrix;
+	glm::mat4 systemMatrix = glm::mat4(1.0f);
+	if (parent) systemMatrix = parent->getSystemMatrix();
+	return glm::translate(systemMatrix, translate) * rotationMatrix;
 }
 
 void Component::updateRotationMatrix()
@@ -32,9 +35,9 @@ void Component::updateRotationMatrix()
 void Component::mechanicalRotate()
 {
 	rotationMatrix = glm::translate(glm::mat4(1.0f), -rotationPoint);
-	//rotationMatrix = glm::rotate(rotationMatrix, pitchAngle, glm::vec3(1.0, 0.0, 0.0));
 	rotationMatrix = glm::rotate(rotationMatrix, yawAngle, glm::vec3(0.0, 1.0, 0.0));
 	rotationMatrix = glm::rotate(rotationMatrix, rollAngle, glm::vec3(0.0, 0.0, 1.0));
+	//rotationMatrix = glm::rotate(rotationMatrix, pitchAngle, glm::vec3(1.0, 0.0, 0.0));
 	rotationMatrix = glm::translate(rotationMatrix, rotationPoint);
 }
 

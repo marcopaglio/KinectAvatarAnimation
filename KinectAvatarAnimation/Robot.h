@@ -2,7 +2,7 @@
 #define ROBOT_CLASS_H
 
 #include "Avatar.h"
-#include "Composite.h"
+#include "ComponentKinect.h"
 #include "Body.h"
 #include "Head.h"
 #include "LeftArm.h"

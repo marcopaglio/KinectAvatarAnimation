@@ -1,9 +1,9 @@
 #ifndef HEAD_CLASS_H
 #define HEAD_CLASS_H
 
-#include "Composite.h"
+#include "ComponentKinect.h"
 
-class Head final : public Composite
+class Head final : public ComponentKinect
 {
 private:
 	Vector4 orientation = Vector4();
@@ -11,18 +11,17 @@ private:
 public:
 	Head(Component* parent, JointType parentJoint, JointType thisJoint,
 		glm::vec3 scaleVector, glm::vec3 translateVector, glm::vec3 rotPoint, glm::vec3 color) :
-		Composite(parent, parentJoint, thisJoint, scaleVector, translateVector, rotPoint, color) { }
+		ComponentKinect(parent, parentJoint, thisJoint, scaleVector, translateVector, rotPoint, color) { }
 
 	void updateRotationAngles(Joint* joints, JointOrientation* jointOrientation) override
 	{
 		orientation = jointOrientation[extremity].Orientation;
-		Composite::updateRotationAngles(joints, jointOrientation);
+		ComponentKinect::updateRotationAngles(joints, jointOrientation);
 	}
 
 protected:
 	bool setRotationAngles() override
 	{
-		bool changed = false;
 		float radAngleX, radAngleZ;
 		float rX, rY, rZ;
 		rX = fulcrumPosition.X - extremityPosition.X;
@@ -34,7 +33,6 @@ protected:
 		value = (value > 1.0) ? 1.0 : value;
 		value = (value < -1.0) ? -1.0 : value;
 		yawAngle = std::asin(value);
-		changed = true;
 
 		radAngleX = std::atan(rZ / rY);
 		// check if changed enough and not too much
@@ -52,7 +50,7 @@ protected:
 			rollAngle = radAngleZ;
 		}
 
-		return changed;
+		return true;
 	}
 };
 

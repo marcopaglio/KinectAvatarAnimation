@@ -13,8 +13,9 @@ private:
 	glm::vec3 rgbColor;
 
 protected:
-	glm::mat4 rotationMatrix;
+	Component* parent;
 
+	glm::mat4 rotationMatrix;
 	glm::vec3 rotationPoint;
 	glm::vec3 translate;
 	float pitchAngle, yawAngle, rollAngle;
@@ -24,8 +25,9 @@ protected:
 	void quaternionRotate();
 
 public:
-	Component(glm::vec3 scaleVector, glm::vec3 translateVector, glm::vec3 rotPoint, glm::vec3 color);
+	Component(Component* parent, glm::vec3 scaleVector, glm::vec3 translateVector, glm::vec3 rotPoint, glm::vec3 color);
 
+	glm::mat4 getSystemMatrix();
 	glm::mat4 getScaleMatrix() const;
 	glm::vec3 getRgbColor() const;
 	float getPitchAngle() const;
@@ -34,7 +36,6 @@ public:
 	void updateTranslate(float x, float y, float z);
 
 	virtual void updateRotationAngles(Joint* joints, JointOrientation* jointOrientation);
-	virtual glm::mat4 getSystemMatrix();
 };
 
 #endif

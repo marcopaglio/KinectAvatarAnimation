@@ -56,6 +56,7 @@ void execute() {
 *           and openGL enviroment with glew function
 * @params argc is main arg UNMODIFIED
 *         argv is main arg UNMODIFIED
+* freeglut requires parameters arc and argv
 */
 void init(int argc, char* argv[]) {
     glutInit(&argc, argv);

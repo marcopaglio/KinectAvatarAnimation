@@ -30,7 +30,7 @@
     <ClCompile Include="KinectSensor.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="Composite.cpp">
+    <ClCompile Include="ComponentKinect.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Avatar.cpp">
@@ -59,7 +59,7 @@
     <ClInclude Include="KinectSensor.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="Composite.h">
+    <ClInclude Include="ComponentKinect.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Avatar.h">

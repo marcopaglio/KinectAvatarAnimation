@@ -147,7 +147,7 @@
     <ClCompile Include="Avatar.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Component.cpp" />
-    <ClCompile Include="Composite.cpp" />
+    <ClCompile Include="ComponentKinect.cpp" />
     <ClCompile Include="glut.cpp" />
     <ClCompile Include="KinectSensor.cpp" />
     <ClCompile Include="main.cpp" />
@@ -159,7 +159,7 @@
     <ClInclude Include="Body.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Component.h" />
-    <ClInclude Include="Composite.h" />
+    <ClInclude Include="ComponentKinect.h" />
     <ClInclude Include="glut.h" />
     <ClInclude Include="Head.h" />
     <ClInclude Include="KinectSensor.h" />

@@ -40,12 +40,15 @@ Camera* camera;
 
 // uniform variable location indeces
 GLuint u_ModelIndex;
-GLuint u_ViewIndex;
+GLuint u_ProjViewIndex;
 GLuint u_NormalIndex;
 GLuint u_LightDiffuseRightIndex;
 GLuint u_LightDiffuseLeftIndex;
 GLuint u_LightDirectionalIndex;
 GLuint u_LightColorIndex;
+
+// projection matrix
+glm::mat4 g_ProjMatrix;
 
 // matrices for light
 glm::vec3 g_LightDiffuseRight = glm::vec3(-1.0f + xPosition, 0.0f + yPosition, -2.5f + zPosition) *= (100 * cubeSize * cubeSize);
@@ -100,26 +103,25 @@ void mouseManager(int state, int x, int y) {
 */
 void drawKinectData() {
 	BOOLEAN wasTracked = tracked;
-	// get kinect datas
 	kinect->getBodyData(&tracked, joints, jointOrientation);
+
 	if (tracked) {
 		// update avatar data
 		avatar->updateData(joints, jointOrientation, &xPosition, &yPosition, &zPosition);
 		camera->setRotationCenter(xPosition, yPosition, zPosition);
-	} else {
+	} 
+	else {
 		if (wasTracked) {
 			avatar->reset(&xPosition, &yPosition, &zPosition);
 			camera->setRotationCenter(xPosition, yPosition, zPosition);
 		}
 	}
 	// get view matrix from camera
-	glm::mat4 viewMatrix = camera->getViewMatrix();
+	glm::mat4 projViewMatrix = g_ProjMatrix * camera->getViewMatrix();
 
 	// Setting uniform view and light matrices 
-	glUniformMatrix4fv(u_ViewIndex, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-	//glUniform3fv(u_LightDiffuseRightIndex, 1, glm::value_ptr(glm::vec3(viewMatrix * glm::vec4(g_LightDiffuseRight, 0.0))));
-	//glUniform3fv(u_LightDiffuseLeftIndex, 1, glm::value_ptr(glm::vec3(viewMatrix * glm::vec4(g_LightDiffuseLeft, 0.0))));
-
+	glUniformMatrix4fv(u_ProjViewIndex, 1, GL_FALSE, glm::value_ptr(projViewMatrix));
+	
 	// Clear color and depth buffer bits
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -205,8 +207,6 @@ int initVertexBuffer() throw (std::runtime_error)
 		20, 21, 22,  20, 22, 23     // back
 	};
 
-	//VAO is eliminated because this project doesn't need to change vbo or ebo
-
 	// vertex buffer object (vbo) contains vertex attributes
 	glGenBuffers(1, &vbo);
 	if (vbo == GL_INVALID_VALUE)
@@ -252,7 +252,10 @@ int main(int argc, char* argv[]) {
 		// Create Camera
 		camera = new Camera(width, height, glm::vec3(xPosition, yPosition, zPosition),
 			glm::vec3(0.0f + xPosition, 0.0f + yPosition, -3.5f + zPosition) *= (100 * cubeSize * cubeSize),
-			glm::vec3(xPosition, yPosition, zPosition - 1.0f), 45.0, 0.1, 1000.0);
+			glm::vec3(xPosition, yPosition, zPosition - 1.0f), 45.0, 0.4, 8.0);
+
+		// Projection matrix never changes
+		g_ProjMatrix = camera->getProjMatrix();
 
 		// OpenGL setup
 		glEnable(GL_DEPTH_TEST);
@@ -260,14 +263,10 @@ int main(int argc, char* argv[]) {
 		glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 		glClearDepth(1.0f);
 
-		// Projection matrix never changes
-		GLuint u_ProjIndex = shaderProgram->getUniformLocation("u_ProjMatrix");
-		glUniformMatrix4fv(u_ProjIndex, 1, GL_FALSE, glm::value_ptr(camera->getProjMatrix()));
-
 		// Get uniform variables location index from shaders
 		// Memorized in global vars in order to set in the future
 		u_ModelIndex = shaderProgram->getUniformLocation("u_ModelMatrix");
-		u_ViewIndex = shaderProgram->getUniformLocation("u_ViewMatrix");
+		u_ProjViewIndex = shaderProgram->getUniformLocation("u_ProjViewMatrix");
 		u_NormalIndex = shaderProgram->getUniformLocation("u_NormalMatrix");
 		u_LightDiffuseRightIndex = shaderProgram->getUniformLocation("u_LightDiffuseRight");
 		u_LightDiffuseLeftIndex = shaderProgram->getUniformLocation("u_LightDiffuseLeft");
