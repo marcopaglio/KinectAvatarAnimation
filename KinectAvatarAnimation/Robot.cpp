@@ -1,5 +1,7 @@
 #include "Robot.h"
 
+constexpr auto epsilon = 0.001f;
+
 // colors
 const glm::vec3 gray = glm::vec3(0.5f, 0.5f, 0.5f);
 const glm::vec3 black = glm::vec3(0.0f, 0.0f, 0.0f);

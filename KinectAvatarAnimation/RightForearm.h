@@ -21,7 +21,7 @@ protected:
 		else rY = extremityPosition.Y - fulcrumPosition.Y;
 		rZ = extremityPosition.Z - fulcrumPosition.Z;
 
-		radAngleY = std::atan2(rZ, (rX + epsilon)) - parent->getYawAngle();
+		radAngleY = std::atan2(rZ, rX) - parent->getYawAngle();
 		// check if changed enough and not too much
 		if (std::abs(radAngleY - yawAngle) < M_PI / 3 &&	// pi/4 == 60°
 			std::abs(radAngleY - yawAngle) > M_PI / 36) {	// pi/36 == 5°
@@ -31,7 +31,7 @@ protected:
 			yawAngle = radAngleY;
 		}
 
-		radAngleZ = std::atan(rY / (rX + epsilon)) - parent->getRollAngle();
+		radAngleZ = std::atan(rY / rX) - parent->getRollAngle();
 		// check if changed enough and not too much
 		if (std::abs(radAngleZ - rollAngle) < M_PI / 3 &&	// pi/3 == 60°
 			std::abs(radAngleZ - rollAngle) > M_PI / 36) {	// pi/36 == 5°
@@ -49,7 +49,6 @@ protected:
 		if (rollAngle < 0) rotationPoint[1] = -std::abs(rotationPoint[1]);
 		else rotationPoint[1] = std::abs(rotationPoint[1]);
 		mechanicalRotate();
-		//Component::updateRotationMatrix();
 	}
 };
 

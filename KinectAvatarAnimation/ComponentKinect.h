@@ -4,7 +4,6 @@
 #include "Component.h"
 
 constexpr auto M_PI = 3.14159265358979323846f;
-constexpr auto epsilon = 0.001f;
 
 class ComponentKinect : public Component
 {

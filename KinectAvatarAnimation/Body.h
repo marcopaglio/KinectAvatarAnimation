@@ -23,12 +23,20 @@ protected:
 	bool setRotationAngles() override
 	{
 		// yaw around Y
+		boolean changed = false;
 		float value = 2.0 * (orientation.w * orientation.y + orientation.z * orientation.x);
 		value = (value > 1.0) ? 1.0 : value;
 		value = (value < -1.0) ? -1.0 : value;
-		yawAngle = std::asin(value);
+		float radAngleY = std::asin(value);
 
-		return true;
+		if (std::abs(radAngleY - yawAngle) > M_PI / 72) {	// pi/72 == 2.5°
+			changed = true;
+
+			// update global values
+			yawAngle = radAngleY;
+		}
+
+		return changed;
 	}
 };
 

@@ -22,7 +22,7 @@ protected:
 		rZ = fulcrumPosition.Z - extremityPosition.Z;
 
 		// usign atan2 allows moving arm 180° <= angle <= 180°
-		radAngleY = std::atan2(rZ, (rX + epsilon));
+		radAngleY = std::atan2(rZ, rX);
 		if (std::abs(radAngleY - yawAngle) < M_PI / 4 &&	// pi/4 == 45°
 			std::abs(radAngleY - yawAngle) > M_PI / 72) {	// pi/72 == 2.5°
 			changed = true;
@@ -31,7 +31,7 @@ protected:
 			yawAngle = radAngleY;
 		}
 
-		radAngleZ = std::atan(rY / (rX + epsilon));
+		radAngleZ = std::atan(rY / rX);
 		// check if changed enough and not too much
 		if (std::abs(radAngleZ - rollAngle) < M_PI / 4 &&	// pi/4 == 45°
 			std::abs(radAngleZ - rollAngle) > M_PI / 72) {	// pi/72 == 2.5°

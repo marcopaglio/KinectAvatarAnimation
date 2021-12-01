@@ -23,7 +23,7 @@ protected:
 		if (std::abs(rY) < M_PI / 54) {	// pi/54 == 3.33°
 			changed = true;
 			radAngleX = M_PI / 2;
-			radAngleY = std::atan2(-rX, rZ + epsilon);
+			radAngleY = std::atan2(-rX, rZ);
 			radAngleZ = 0.0f;
 
 			pitchAngle = radAngleX;
@@ -31,7 +31,7 @@ protected:
 			rollAngle = radAngleZ;
 		}
 		else {
-			radAngleX = std::atan2(rZ, rY + epsilon);
+			radAngleX = std::atan2(rZ, rY);
 			// check if changed enough and not too much
 			if (std::abs(radAngleX - pitchAngle) < M_PI / 4 &&	// pi/4 == 45°
 				std::abs(radAngleX - pitchAngle) > M_PI / 36) {	// pi/36 == 5°
@@ -41,7 +41,7 @@ protected:
 				pitchAngle = radAngleX;
 			}
 
-			radAngleZ = std::atan(rX / (rY + epsilon));
+			radAngleZ = std::atan(rX / rY);
 			radAngleZ = (rY < 0) ? -radAngleZ : radAngleZ;
 			if (std::abs(radAngleZ - rollAngle) < M_PI / 4 &&	// pi/4 == 45°
 				std::abs(radAngleZ - rollAngle) > M_PI / 36) {	// pi/36 == 5°
