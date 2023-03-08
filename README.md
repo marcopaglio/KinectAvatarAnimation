@@ -1,9 +1,9 @@
 # KinectAvatarAnimation
 
-/***********  IN SHORT  ***********/
+/***********  IN SHORT  ***********/  
 Animate an OpenGL avatar using XBOX Kinect v2 depth sensor
 
-/***********  VERBOSE  ***********/
+/***********  VERBOSE  ***********/  
 XBOX Kinect v2 is a depth and rgb camera with body tracking informations.
 This project aims to use datas from Kinect in order to animate an OpenGL avatar.
 Animation is done calculating rotation angles in real world and applying them to the avatar.
@@ -11,7 +11,7 @@ OpenGL is a programming API for 3D computer graphic.
 Avatar could be anything write in OpenGL: in this project it is a simple humanoid robot.
 Robot has only the main parts of human body: body, head, arms and forearms, thighs and legs.
 
-/***********  BEFORE YOU START  ***********/
+/***********  BEFORE YOU START  ***********/  
 This project was built in Windows OS with Visual Studio 2019 Enviroments.
 
 Kinect hardware used is the second version for XBOX and Microsoft Systems, too.
